@@ -1,0 +1,11 @@
+@model Expense
+@{ ViewData["Title"] = "Add expense"; }
+
+<h1>Add expense</h1>
+<form asp-action="Create" method="post" class="form">
+    <partial name="_Form" model="Model" />
+    <div class="row">
+        <button type="submit" class="btn">Save expense</button>
+        <a asp-action="Index">Cancel</a>
+    </div>
+</form>

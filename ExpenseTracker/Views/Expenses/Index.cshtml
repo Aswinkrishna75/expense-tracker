@@ -1,0 +1,67 @@
+@model IndexViewModel
+@{
+    ViewData["Title"] = "Expenses";
+    var inr = new System.Globalization.CultureInfo("en-IN");
+    var max = Model.ByCategory.Any() ? Model.ByCategory.Max(c => c.Total) : 1;
+}
+
+<section class="totals">
+    <div>
+        <span class="muted">@(string.IsNullOrEmpty(Model.SelectedCategory) ? "All expenses" : Model.SelectedCategory)</span>
+        <strong>₹@Model.Total.ToString("N2", inr)</strong>
+    </div>
+    <div>
+        <span class="muted">This month</span>
+        <strong>₹@Model.ThisMonth.ToString("N2", inr)</strong>
+    </div>
+</section>
+
+@if (Model.ByCategory.Any())
+{
+    <section class="cats">
+        @foreach (var c in Model.ByCategory)
+        {
+            <a class="cat @(Model.SelectedCategory == c.Category ? "on" : "")"
+               asp-action="Index" asp-route-category="@c.Category">
+                <span>@c.Category</span>
+                <span class="bar"><i style="width:@((int)(c.Total / max * 100))%"></i></span>
+                <span class="amt">₹@c.Total.ToString("N0", inr)</span>
+            </a>
+        }
+        @if (!string.IsNullOrEmpty(Model.SelectedCategory))
+        {
+            <a class="clear" asp-action="Index">Show all categories</a>
+        }
+    </section>
+}
+
+@if (!Model.Expenses.Any())
+{
+    <p class="empty">No expenses yet. <a asp-action="Create">Add your first expense</a>.</p>
+}
+else
+{
+    <table>
+        <thead>
+            <tr><th>Date</th><th>Title</th><th>Category</th><th class="r">Amount</th><th></th></tr>
+        </thead>
+        <tbody>
+        @foreach (var e in Model.Expenses)
+        {
+            <tr>
+                <td>@e.Date.ToString("dd MMM yyyy")</td>
+                <td>@e.Title @if (!string.IsNullOrWhiteSpace(e.Note)) { <small class="muted">@e.Note</small> }</td>
+                <td>@e.Category</td>
+                <td class="r">₹@e.Amount.ToString("N2", inr)</td>
+                <td class="actions">
+                    <a asp-action="Edit" asp-route-id="@e.Id">Edit</a>
+                    <form asp-action="Delete" asp-route-id="@e.Id" method="post"
+                          onsubmit="return confirm('Delete this expense?');">
+                        <button type="submit" class="link danger">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
